@@ -1,0 +1,2 @@
+# No external dependencies required for this simple CLI app.
+# Uses only Python standard library modules: argparse, json, pathlib.
