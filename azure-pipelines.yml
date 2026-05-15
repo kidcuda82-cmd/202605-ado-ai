@@ -48,6 +48,32 @@ steps:
   inputs:
     PathtoPublish: 'bandit-report.json'
     ArtifactName: 'BanditReport'
+
+- script: |
+    # Determine version using semantic versioning (placeholder for v1.0.0)
+    VERSION="v1.0.0"
+    git tag $VERSION
+    git push origin $VERSION
+  displayName: 'Create Git Tag for Release'
+
+- script: |
+    # Generate release notes in CHANGELOG.md
+    echo "# Changelog" > CHANGELOG.md
+    echo "" >> CHANGELOG.md
+    echo "## v1.0.0" >> CHANGELOG.md
+    echo "" >> CHANGELOG.md
+    git log --oneline --pretty=format:"- %s (%h)" | head -20 >> CHANGELOG.md
+  displayName: 'Generate Release Notes'
+
+- script: |
+    # Zip the application
+    zip -r app.zip . -x "*.git*" "*_work*" "*bin*" "*externals*" "*myagent/_diag*" "*myagent/_work*"
+  displayName: 'Zip Application'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'app.zip'
+    ArtifactName: 'ApplicationZip'
   condition: always()
 
 - script: |
