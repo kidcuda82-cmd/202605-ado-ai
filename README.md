@@ -8,6 +8,7 @@ This repository includes a CLI skeleton in `src/todo.py` that supports adding ta
 
 - `python src/todo.py add "Buy milk"`
 - `python src/todo.py list`
+- `python src/todo.py complete <task_number>`
 
 ## Files
 

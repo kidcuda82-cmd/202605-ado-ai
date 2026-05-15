@@ -43,11 +43,11 @@ def complete_task(task_id):
         print("No tasks found.")
         return
 
-    try:
-        task = tasks[task_id]
-    except IndexError:
+    if task_id < 1 or task_id > len(tasks):
         print(f"Task {task_id} does not exist.")
         return
+
+    task = tasks[task_id - 1]
 
     if task.get("completed"):
         print(f"Task {task_id} is already complete.")
