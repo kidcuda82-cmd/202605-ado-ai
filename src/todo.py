@@ -37,6 +37,27 @@ def list_tasks():
         print(f"{index}. {status} {task.get('description')}")
 
 
+def complete_task(task_id):
+    tasks = load_tasks()
+    if not tasks:
+        print("No tasks found.")
+        return
+
+    try:
+        task = tasks[task_id]
+    except IndexError:
+        print(f"Task {task_id} does not exist.")
+        return
+
+    if task.get("completed"):
+        print(f"Task {task_id} is already complete.")
+        return
+
+    task["completed"] = True
+    save_tasks(tasks)
+    print(f"Marked task {task_id} complete.")
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         description="Simple todo list CLI app using JSON storage."
@@ -45,6 +66,9 @@ def build_parser():
 
     add_parser = subparsers.add_parser("add", help="Add a new task")
     add_parser.add_argument("description", help="Task description")
+
+    complete_parser = subparsers.add_parser("complete", help="Mark a task complete")
+    complete_parser.add_argument("task_id", type=int, help="Task number to mark complete")
 
     subparsers.add_parser("list", help="List all tasks")
     return parser
@@ -58,6 +82,8 @@ def main():
         add_task(args.description)
     elif args.command == "list":
         list_tasks()
+    elif args.command == "complete":
+        complete_task(args.task_id)
 
 
 if __name__ == "__main__":
