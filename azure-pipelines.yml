@@ -1,5 +1,7 @@
 trigger:
 - main
+- fix/*
+- feature/*
 
 pool:
   name: 202605-ado-ai
