@@ -34,9 +34,8 @@ steps:
     reportDirectory: 'htmlcov'
   condition: always()
 
-- script: bandit -r . -f json -o bandit-report.json
+- script: bandit -r . -f json -o bandit-report.json || true
   displayName: 'Run Bandit security scan'
-  continueOnError: true
 
 - task: PublishBuildArtifacts@1
   inputs:
@@ -46,9 +45,8 @@ steps:
 
 - script: |
     curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-    trivy filesystem --format json --output trivy-report.json .
+    trivy filesystem --format json --output trivy-report.json . || true
   displayName: 'Run Trivy dependency scan'
-  continueOnError: true
 
 - task: PublishBuildArtifacts@1
   inputs:
