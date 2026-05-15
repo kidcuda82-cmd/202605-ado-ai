@@ -37,6 +37,13 @@ steps:
 - script: bandit -r . -f json -o bandit-report.json || true
   displayName: 'Run Bandit security scan'
 
+- script: |
+    if [ ! -f bandit-report.json ]; then
+      echo '{}' > bandit-report.json
+    fi
+  displayName: 'Ensure Bandit report exists'
+  condition: always()
+
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: 'bandit-report.json'
@@ -44,9 +51,22 @@ steps:
   condition: always()
 
 - script: |
-    wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.tar.gz
-    tar -xzf trivy_0.50.1_Linux-64bit.tar.gz
-    ./trivy filesystem --format json --output trivy-report.json . || true
+    if command -v trivy &> /dev/null; then
+      echo "Trivy already installed"
+    else
+      echo "Installing Trivy..."
+      wget -q https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.tar.gz
+      tar -xzf trivy_0.50.1_Linux-64bit.tar.gz
+      chmod +x ./trivy
+      export PATH=$PWD:$PATH
+    fi
+    trivy filesystem --format json --output trivy-report.json . || true
+    if [ -f trivy-report.json ]; then
+      echo "Trivy report generated successfully"
+    else
+      echo "Warning: Trivy report was not generated"
+      echo '{}' > trivy-report.json
+    fi
   displayName: 'Run Trivy dependency scan'
 
 - task: PublishBuildArtifacts@1
