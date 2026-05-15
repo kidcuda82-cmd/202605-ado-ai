@@ -1,0 +1,53 @@
+trigger:
+- main
+
+pool:
+  name: 202605-ado-ai
+
+steps:
+#- task: UsePythonVersion@0
+#  inputs:
+#    versionSpec: '3.x'
+#  displayName: 'Use Python 3.x'
+
+- script: pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+- script: pip install pytest pytest-cov bandit
+  displayName: 'Install test and security tools'
+
+- script: pytest --junitxml=test-results.xml --cov=. --cov-report=cobertura:coverage.xml --cov-report=html:htmlcov
+  displayName: 'Run tests with coverage'
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: 'test-results.xml'
+    testRunTitle: 'Python Tests'
+  condition: always()
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: 'coverage.xml'
+    reportDirectory: 'htmlcov'
+  condition: always()
+
+- script: bandit -r . -f json -o bandit-report.json
+  displayName: 'Run Bandit security scan'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'bandit-report.json'
+    ArtifactName: 'BanditReport'
+  condition: always()
+
+- script: |
+    curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+    trivy filesystem --format json --output trivy-report.json .
+  displayName: 'Run Trivy dependency scan'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'trivy-report.json'
+    ArtifactName: 'TrivyReport'
+  condition: always()
