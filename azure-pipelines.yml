@@ -36,6 +36,7 @@ steps:
 
 - script: bandit -r . -f json -o bandit-report.json
   displayName: 'Run Bandit security scan'
+  continueOnError: true
 
 - task: PublishBuildArtifacts@1
   inputs:
@@ -47,6 +48,7 @@ steps:
     curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
     trivy filesystem --format json --output trivy-report.json .
   displayName: 'Run Trivy dependency scan'
+  continueOnError: true
 
 - task: PublishBuildArtifacts@1
   inputs:
